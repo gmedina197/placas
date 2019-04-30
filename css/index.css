@@ -1,0 +1,26 @@
+body, html {
+    height: 100%;
+    margin: 0;
+}
+
+canvas {
+    padding: 0;
+    margin: auto;
+    display: block;
+    outline: black 1px solid;
+}
+
+a {
+    font-family: "Droid Sans";
+}
+
+h1 {
+    font-size: 20px;
+    font-weight: bold;
+    font-family: "Droid Sans";
+    color: rgb(255, 255, 255);
+}
+
+.highlight:hover {
+    color: rgb(49, 219, 182);
+}

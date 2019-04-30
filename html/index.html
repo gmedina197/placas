@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-beta/css/materialize.min.css">
+
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" type="text/css " href="/css/index.css">
+
+
+    <title>Placas</title>
+</head>
+
+<body>
+    <div class="row">
+        <div class="col-md-12">
+            <nav>
+                <div class="nav-wrapper blue darken-4">
+                    <a target="_blank" href="https://www.facebook.com/brendo.peres.7" class="brand-logo highlight">&nbsp
+                        Placas de PID</a>
+                    <ul class="right hide-on-med-and-down">
+                        <li>
+                            <a onclick="run()">
+                                <i class="material-icons" data-toggle="tooltip" data-placement="top"
+                                    title="Executar">send</i>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="modal-trigger" href="#modal-info">
+                                <i class="material-icons" data-toggle="tooltip" data-placement="bottom"
+                                    title="Alunos">info</i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+            <div class="row">
+                <div class="col-md-12">
+                    <div name="Image-1">
+                        <h1 align="center">Imagem de referência</h1>
+
+                        <div>
+                            <canvas width="800" height="500" id="canvas"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="file-field input-field">
+                    <div class="btn">
+                        <span>Choose placa</span>
+                        <input type="file" multiple="false" id="picField" onchange="uploadImage()" accept="image/*" />
+                    </div>
+
+                    <div class="file-path-wrapper">
+                        <input class="file-path validate" type="text" placeholder="Upload placa" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script src="/assets/materialize/js/materialize.min.js"></script>
+<script src="/js/SimpleImage.js"></script>
+<script src="/js/index.js"></script>
+
+</html>
