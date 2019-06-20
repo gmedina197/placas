@@ -76,6 +76,13 @@ SimplePixel.prototype = {
     toString: function () {
         return 'r:' + this.getRed() + ' g:' + this.getGreen() + ' b:' + this.getBlue();
     },
+    equals: function(pixel) {
+        if(this.getRed() === pixel.getRed()) {
+            return true;
+        }
+
+        return false;
+    },
     // Render pixel as string
     getString: function () {
         return this.toString();
@@ -304,7 +311,7 @@ var __SimpleImageUtilities = (function () {
         if (loadFunc == null) {
             loadFunc = function() {
                 simpleImage.__init(this);
-                console.log('loaded image: ' + simpleImage.id);
+                //console.log('loaded image: ' + simpleImage.id);
             }
         }
         var img = new Image();
@@ -332,7 +339,7 @@ var __SimpleImageUtilities = (function () {
 
         // get image from uploaded file input
         makeHTMLImageFromInput: function (file, simpleImage) {
-            console.log('creating image: ' + file.name);
+            //console.log('creating image: ' + file.name);
             var reader = new FileReader();
             reader.onload = function() {
                 makeHTMLImage(this.result, file.name.substr(file.name.lastIndexOf('/') + 1), simpleImage);
