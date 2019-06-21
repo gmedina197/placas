@@ -76,8 +76,12 @@ SimplePixel.prototype = {
     toString: function () {
         return 'r:' + this.getRed() + ' g:' + this.getGreen() + ' b:' + this.getBlue();
     },
-    equals: function(pixel) {
-        if(this.getRed() === pixel.getRed()) {
+    equals: function (pixel) {
+
+        if (this.getRed() === pixel.getRed() &&
+            this.getGreen() === pixel.getGreen() &&
+            this.getBlue() === pixel.getBlue()) {
+
             return true;
         }
 
@@ -232,7 +236,7 @@ SimpleImage.prototype = {
         }
         else {
             var myself = this;
-            setTimeout(function() {
+            setTimeout(function () {
                 myself.drawTo(toCanvas);
             }, 100);
         }
@@ -248,19 +252,19 @@ SimpleImage.prototype = {
         // Non-firefox browsers may benefit
         for (var y = 0; y < this.getHeight(); y++) {
             for (var x = 0; x < this.getWidth(); x++) {
-                  //array[i++] = new SimplePixel(this, x, y);  // 2.
-                  array.push(new SimplePixel(this, x, y));  // 1.
+                //array[i++] = new SimplePixel(this, x, y);  // 2.
+                array.push(new SimplePixel(this, x, y));  // 1.
             }
         }
         return array;
     },
     // Support iterator within for loops (eventually)
-    values: function() {
+    values: function () {
         __SimpleImageUtilities.funCheck('values', 0, arguments.length);
         return this.toArray();
     },
     // Better name than values if we have to use it
-    pixels: function() {
+    pixels: function () {
         return this.values();
     },
 
@@ -307,9 +311,9 @@ var __SimpleImageUtilities = (function () {
     // number of canvases created to hold images
     var globalCanvasCount = 0;
     // load image by wrapping it in an HTML element
-    function makeHTMLImage (url, name, simpleImage, loadFunc) {
+    function makeHTMLImage(url, name, simpleImage, loadFunc) {
         if (loadFunc == null) {
-            loadFunc = function() {
+            loadFunc = function () {
                 simpleImage.__init(this);
                 //console.log('loaded image: ' + simpleImage.id);
             }
@@ -325,7 +329,7 @@ var __SimpleImageUtilities = (function () {
     // public utility functions
     return {
         // make a blank image so it is cached for future uses
-        EMPTY_IMAGE: makeHTMLImage(EMPTY_IMAGE_DATA, 'EMPTY', null, function () {}),
+        EMPTY_IMAGE: makeHTMLImage(EMPTY_IMAGE_DATA, 'EMPTY', null, function () { }),
 
         // create a canvas element
         makeHTMLCanvas: function (prefix) {
@@ -341,7 +345,7 @@ var __SimpleImageUtilities = (function () {
         makeHTMLImageFromInput: function (file, simpleImage) {
             //console.log('creating image: ' + file.name);
             var reader = new FileReader();
-            reader.onload = function() {
+            reader.onload = function () {
                 makeHTMLImage(this.result, file.name.substr(file.name.lastIndexOf('/') + 1), simpleImage);
             }
             reader.readAsDataURL(file);
@@ -404,7 +408,7 @@ var __SimpleImageUtilities = (function () {
                 var s1 = (actualLen == 1) ? '' : 's';  // pluralize correctly
                 var s2 = (expectedLen == 1) ? '' : 's';
                 var message = 'You tried to call ' + funcName + ' with ' + actualLen + ' value' + s1 +
-                              ', but it expects ' + expectedLen + ' value' + s2 + '.';
+                    ', but it expects ' + expectedLen + ' value' + s2 + '.';
                 // someday: think about "values" vs. "arguments" here
                 __SimpleImageUtilities.throwError(message);
             }
@@ -414,8 +418,8 @@ var __SimpleImageUtilities = (function () {
         rangeCheck: function (value, low, high, funName, coordName, size) {
             if (value < low || value >= high) {
                 var message = 'You tried to call ' + funName + ' for a pixel with ' + coordName + '-coordinate of ' + value +
-                              ' in an image that is only ' + high + ' pixels ' + size +
-                              ' (valid ' + coordName + ' coordinates are ' + low + ' to ' + (high-1) + ').';
+                    ' in an image that is only ' + high + ' pixels ' + size +
+                    ' (valid ' + coordName + ' coordinates are ' + low + ' to ' + (high - 1) + ').';
                 __SimpleImageUtilities.throwError(message);
             }
         }

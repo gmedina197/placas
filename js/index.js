@@ -37,72 +37,61 @@ function uploadImage() {
 }
 
 function getPercentage(number) {
-	return ((number / 100) * 40) - number;
+	const percent = (number / 100) * 40;
+	return [percent, percent - number];
 }
 
 function detect() {
-	const newLength = getPercentage(refImage.toArray().length);
+	const [percent, newLength] = getPercentage(refImage.toArray().length);
 	const arrayOfPixels = [...refImage.toArray()]/* .slice(newLength) */;
+	const imageMatrix = [];
 	const imageDimensions = {
 		w: refImage.getWidth(),
 		h: refImage.getHeight()
 	};
 
-	console.log(imageDimensions)
-
-	let possiblePlaca = [];
-
-	let scanlines = [...Array(placaHeight.b / 2)]/* .map(() => {
-		return new Array();
-	});*/
-
-	let maxRange = 30;
-	let range = 0;
-
-	for (let index = 0; index < arrayOfPixels.length; index++) {
-		if (index % imageDimensions.w === 0) {
-			index += imageDimensions.w;
-			continue;
-		}
-
-		const prevPixel = arrayOfPixels[index - 1];
-		const pixel = arrayOfPixels[index];
-		const color = pixel.getRed();
-
-		possiblePlaca.push(pixel);
-
-		if (prevPixel && !prevPixel.equals(pixel)) {
-			range = 0;
-		} else {
-			range++;
-		}
-
-		if (range > maxRange) {
-			if (placaWidth.a <= possiblePlaca.length <= placaWidth.b) {
-				//scanlines.push(possiblePlaca);
-				console.log(possiblePlaca)
-
-				ctx.beginPath();
-				ctx.strokeStyle = 'rgb(255, 0, 0)';
-				ctx.moveTo(possiblePlaca[0].getX(), possiblePlaca[0].getY());
-				ctx.lineTo(possiblePlaca[30].getX(), possiblePlaca[30].getY());
-				ctx.stroke();
-				
-				
-				break;
-			} else {
-				possiblePlaca = [];
-			}
-		}
+	while (arrayOfPixels.length) {
+		imageMatrix.push(arrayOfPixels.splice(0, imageDimensions.w));
 	}
 
+	let possiblePlaca = [];
+	const maxRange = 40;
 
-	/* const white = arr.filter(color => color === 255).length;
-	const black = arr.filter(color => color === 0).length;
-	const diff = (Math.abs(white - black));
+	for (let y = 0; y < imageDimensions.h; y += 2) {
+		let scanline = [];
+		let addTo = false;
+		let range = 0;
 
-	console.log(arr)
-	console.log({ white, black, diff, total: arr.length }); */
+		for (let x = 0; x < imageDimensions.w; x++) {
+			const pixel = imageMatrix[y][x];
+			const prevPixel = imageMatrix[y][x - 1];
+
+			const isDiff = prevPixel && !pixel.equals(prevPixel);
+			if (isDiff && range < maxRange/*  || addTo */) {
+				addTo = true;
+				range = 0;
+			} else {
+				addTo = false;
+				range++;
+			}
+
+			if (addTo) {
+				scanline.push(pixel);
+			}
+		}
+
+		if (scanline.length > 0) {
+			//possiblePlaca.push(scanline);
+			ctx.beginPath();
+			ctx.strokeStyle = 'rgb(255, 0, 0)';
+			ctx.moveTo(scanline[0].getX(), scanline[0].getY());
+			ctx.lineTo(
+				scanline[scanline.length - 1].getX(),
+				scanline[scanline.length - 1].getY()
+			);
+			ctx.stroke();
+		}
+	}
 
 }
 
