@@ -73,18 +73,20 @@ SimplePixel.prototype = {
         this.setBlue(pixel.getBlue());
         this.setAlpha(pixel.getAlpha());
     },
+    setAllColor: function(color) {
+        this.setRed(color);
+        this.setGreen(color);
+        this.setBlue(color);
+    },
     toString: function () {
         return 'r:' + this.getRed() + ' g:' + this.getGreen() + ' b:' + this.getBlue();
     },
     equals: function (pixel) {
-
         if (this.getRed() === pixel.getRed() &&
             this.getGreen() === pixel.getGreen() &&
             this.getBlue() === pixel.getBlue()) {
-
             return true;
         }
-
         return false;
     },
     // Render pixel as string

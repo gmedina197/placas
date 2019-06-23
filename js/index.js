@@ -26,7 +26,6 @@ form.addEventListener('change', () => T = setValueT());
 
 //functions
 function run() {
-	grayScaleMatrix();
 	thresholding();
 	detect();
 }
@@ -50,6 +49,8 @@ function detect() {
 		h: refImage.getHeight()
 	};
 
+	console.log(imageDimensions)
+
 	while (arrayOfPixels.length) {
 		imageMatrix.push(arrayOfPixels.splice(0, imageDimensions.w));
 	}
@@ -62,12 +63,31 @@ function detect() {
 		let addTo = false;
 		let range = 0;
 
-		for (let x = 0; x < imageDimensions.w; x++) {
+		for (const [i, pixel] of imageMatrix[y].entries()) {
+			const prevPixel = imageMatrix[y][i - 1];
+
+			scanline.push(i);
+
+			if (prevPixel && pixel.equals(prevPixel)) {
+				range++;
+			} else {
+				range = 0;
+			}
+
+			if (range >= maxRange) {
+				scanline = [];
+			}
+		}
+		if (scanline.length > 0) {
+			console.log(scanline);
+		}
+
+		/* for (let x = 0; x < imageDimensions.w; x++) {
 			const pixel = imageMatrix[y][x];
 			const prevPixel = imageMatrix[y][x - 1];
 
 			const isDiff = prevPixel && !pixel.equals(prevPixel);
-			if (isDiff && range < maxRange/*  || addTo */) {
+			if (isDiff && range < maxRange) {
 				addTo = true;
 				range = 0;
 			} else {
@@ -90,38 +110,20 @@ function detect() {
 				scanline[scanline.length - 1].getY()
 			);
 			ctx.stroke();
-		}
+		} */
 	}
 
-}
-
-function grayScaleMatrix() {
-	const arrayOfPixels = refImage.toArray();
-	arrayOfPixels.forEach((pixel, index) => {
-		//if (index >= (arrayOfPixels.length - newLength)) {
-		let avg = (pixel.getRed() + pixel.getGreen() + pixel.getBlue()) / 3;
-
-		pixel.setRed(avg);
-		pixel.setGreen(avg);
-		pixel.setBlue(avg);
-	});
-
-	refImage.drawTo(canvas);
 }
 
 function thresholding() {
 	const arrayOfPixels = refImage.toArray();
 	arrayOfPixels.forEach(pixel => {
-		const avg = pixel.getRed();
+		let avg = (pixel.getRed() + pixel.getGreen() + pixel.getBlue()) / 3;
 
 		if (avg >= T) {
-			pixel.setRed(0);
-			pixel.setGreen(0);
-			pixel.setBlue(0)
+			pixel.setAllColor(0);
 		} else {
-			pixel.setRed(255);
-			pixel.setGreen(255);
-			pixel.setBlue(255)
+			pixel.setAllColor(255);
 		}
 	});
 
