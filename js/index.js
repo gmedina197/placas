@@ -7,7 +7,7 @@ const form = document.getElementById('form');
 
 const placaWidth = {
   a1: 125,
-  a: 81,
+  a: 65,
   b: 200
 };
 
@@ -19,7 +19,7 @@ const placaHeight = {
 const setValueT = () => minor.checked ? 37 : 185;
 
 let T = setValueT();
-let refImage;
+let refImage, originalImage;
 
 //Event listeners
 form.addEventListener('change', () => T = setValueT());
@@ -32,6 +32,7 @@ function run() {
 
 function uploadImage() {
   refImage = new SimpleImage(imgDOM);
+  originalImage = new SimpleImage(imgDOM);
   refImage.drawTo(canvas);
 }
 
@@ -87,11 +88,10 @@ function detect() {
       if (color === -1) {
         if (range <= maxRange) {
           for (let j = 0; j < arrAux.length; j++) {
-            paintPixel(arrAux[j].getX(), arrAux[j].getY());
+            //paintPixel(arrAux[j].getX(), arrAux[j].getY());
             scanline.push(arrAux[j]);
           }
         } else {
-          possiblePlaca.push(scanline); //referencia o array de baixo, visto que é o mesmo
           break;
         }
         arrAux = [];
@@ -102,6 +102,7 @@ function detect() {
       }
     }
 
+    scanline.reverse();
     range = 0;
     arrAux = [];
 
@@ -111,7 +112,8 @@ function detect() {
       if (color === -1) {
         if (range <= maxRange) {
           for (let j = 0; j < arrAux.length; j++) {
-            paintPixel(arrAux[j].getX(), arrAux[j].getY());
+            //paintPixel(arrAux[j].getX(), arrAux[j].getY());
+
             scanline.push(arrAux[j]);
           }
         } else {
@@ -124,15 +126,64 @@ function detect() {
         range++;
       }
     }
-  }
 
+    if (scanline.length > placaWidth.a && y < (imageMatrix.length / 100) * 80) {
+      const newScanline = scanline.filter(pixel => {
+        const between = 140 < pixel.getX() && pixel.getX() < 340;
+        if (between) {
+          //paintPixel(pixel.getX(), pixel.getY());
+          return true;
+        } else {
+          return false;
+        }
+      });
+
+      possiblePlaca.push(newScanline); //referencia o array de baixo, visto que é o mesmo
+    } else {
+      possiblePlaca.push([]);
+    }
+  }
+  console.log(possiblePlaca)
+  let count = 0;
+  const minCount = 7;
   for (let i = possiblePlaca.length - 1; i >= 0; i--) {
-    const placaArray = possiblePlaca[i];
-    
-    console.log(placaArray)
+    const arrPixels = possiblePlaca[i];
 
+    if (arrPixels.length === 0) {
+      if (count < minCount) {
+        possiblePlaca.splice(i, count + 1);
+      }
+      count = 0;
+    } else {
+      count++;
+    }
 
+    if (count >= minCount) {
+      break;
+    }
   }
+
+
+  let placa = [];
+  for (let i = possiblePlaca.length - 1; i >= 0; i--) {
+    const arrPixels = possiblePlaca[i];
+
+    if (arrPixels.length === 0) {
+      break;
+    } else {
+      placa.push(arrPixels);
+    }
+  }
+
+  placa.reverse();
+
+
+  const media = placa.reduce((acumm, atual) => acumm + atual.length, 30) / placa.length;
+
+  originalImage.drawTo(canvas);
+
+  ctx.strokeStyle = 'rgb(255,  0, 0)';
+  ctx.strokeRect(placa[0][0].getX() - 10, placa[0][0].getY() - 10, media + 25, (placa.length * 2) + 20);
 
 }
 
