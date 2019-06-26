@@ -6,14 +6,14 @@ const major = document.getElementById('185');
 const form = document.getElementById('form');
 
 const placaWidth = {
-	a1: 125,
-	a: 81,
-	b: 200
+  a1: 125,
+  a: 81,
+  b: 200
 };
 
 const placaHeight = {
-	a: 35,
-	b: 60
+  a: 35,
+  b: 60
 };
 
 const setValueT = () => minor.checked ? 37 : 185;
@@ -26,107 +26,128 @@ form.addEventListener('change', () => T = setValueT());
 
 //functions
 function run() {
-	thresholding();
-	detect();
+  thresholding();
+  detect();
 }
 
 function uploadImage() {
-	refImage = new SimpleImage(imgDOM);
-	refImage.drawTo(canvas);
+  refImage = new SimpleImage(imgDOM);
+  refImage.drawTo(canvas);
 }
 
 function getPercentage(number) {
-	const percent = (number / 100) * 40;
-	return [percent, percent - number];
+  const percent = (number / 100) * 40;
+  return percent - number;
+}
+
+function paintPixel(x, y) {
+  ctx.fillStyle = 'rgb(255,  0, 0)';
+  ctx.fillRect(x, y, 1, 1);
 }
 
 function detect() {
-	const [percent, newLength] = getPercentage(refImage.toArray().length);
-	const arrayOfPixels = [...refImage.toArray()]/* .slice(newLength) */;
-	const imageMatrix = [];
-	const imageDimensions = {
-		w: refImage.getWidth(),
-		h: refImage.getHeight()
-	};
+  const newLength = getPercentage(refImage.toArray().length);
+  const arrayOfPixels = [...refImage.toArray()].slice(newLength);
+  const imageMatrix = [];
+  const imageDimensions = {
+    w: refImage.getWidth(),
+    h: refImage.getHeight()
+  };
 
-	console.log(imageDimensions)
+  console.log(imageDimensions)
 
-	while (arrayOfPixels.length) {
-		imageMatrix.push(arrayOfPixels.splice(0, imageDimensions.w));
-	}
+  while (arrayOfPixels.length) {
+    imageMatrix.push(arrayOfPixels.splice(0, imageDimensions.w));
+  }
 
-	let possiblePlaca = [];
-	const maxRange = 40;
+  const maxRange = 40;
+  let possiblePlaca = [];
 
-	for (let y = 0; y < imageDimensions.h; y += 2) {
-		let scanline = [];
-		let addTo = false;
-		let range = 0;
+  for (let y = 0; y < imageMatrix.length; y += 2) {
+    let scanline = [];
+    let range = 0;
+    let arr = [];
+    let arrAux = [];
 
-		for (const [i, pixel] of imageMatrix[y].entries()) {
-			const prevPixel = imageMatrix[y][i - 1];
+    for (let x = 0; x < imageDimensions.w; x++) {
+      const pixel = imageMatrix[y][x];
+      const prevPixel = imageMatrix[y][x - 1];
 
-			scanline.push(i);
+      const isDiff = prevPixel && !pixel.equals(prevPixel);
+      if (isDiff) {
+        arr[x] = -1;
+      } else {
+        arr[x] = pixel;
+      }
+    }
 
-			if (prevPixel && pixel.equals(prevPixel)) {
-				range++;
-			} else {
-				range = 0;
-			}
+    for (let x = imageDimensions.w / 2; x > 0; x--) {
+      const color = typeof arr[x] === "number" ? arr[x] : arr[x].getRed();
 
-			if (range >= maxRange) {
-				scanline = [];
-			}
-		}
-		if (scanline.length > 0) {
-			console.log(scanline);
-		}
+      if (color === -1) {
+        if (range <= maxRange) {
+          for (let j = 0; j < arrAux.length; j++) {
+            paintPixel(arrAux[j].getX(), arrAux[j].getY());
+            scanline.push(arrAux[j]);
+          }
+        } else {
+          possiblePlaca.push(scanline); //referencia o array de baixo, visto que é o mesmo
+          break;
+        }
+        arrAux = [];
+        range = 0;
+      } else {
+        arrAux.push(arr[x]);
+        range++;
+      }
+    }
 
-		/* for (let x = 0; x < imageDimensions.w; x++) {
-			const pixel = imageMatrix[y][x];
-			const prevPixel = imageMatrix[y][x - 1];
+    range = 0;
+    arrAux = [];
 
-			const isDiff = prevPixel && !pixel.equals(prevPixel);
-			if (isDiff && range < maxRange) {
-				addTo = true;
-				range = 0;
-			} else {
-				addTo = false;
-				range++;
-			}
+    for (let x = (imageDimensions.w / 2) + 1; x < imageDimensions.w; x++) {
+      const color = typeof arr[x] === "number" ? arr[x] : arr[x].getRed();
 
-			if (addTo) {
-				scanline.push(pixel);
-			}
-		}
+      if (color === -1) {
+        if (range <= maxRange) {
+          for (let j = 0; j < arrAux.length; j++) {
+            paintPixel(arrAux[j].getX(), arrAux[j].getY());
+            scanline.push(arrAux[j]);
+          }
+        } else {
+          break;
+        }
+        arrAux = [];
+        range = 0;
+      } else {
+        arrAux.push(arr[x]);
+        range++;
+      }
+    }
+  }
 
-		if (scanline.length > 0) {
-			//possiblePlaca.push(scanline);
-			ctx.beginPath();
-			ctx.strokeStyle = 'rgb(255, 0, 0)';
-			ctx.moveTo(scanline[0].getX(), scanline[0].getY());
-			ctx.lineTo(
-				scanline[scanline.length - 1].getX(),
-				scanline[scanline.length - 1].getY()
-			);
-			ctx.stroke();
-		} */
-	}
+  for (let i = possiblePlaca.length - 1; i >= 0; i--) {
+    const placaArray = possiblePlaca[i];
+    
+    console.log(placaArray)
+
+
+  }
 
 }
 
 function thresholding() {
-	const arrayOfPixels = refImage.toArray();
-	arrayOfPixels.forEach(pixel => {
-		let avg = (pixel.getRed() + pixel.getGreen() + pixel.getBlue()) / 3;
+  const arrayOfPixels = refImage.toArray();
+  arrayOfPixels.forEach(pixel => {
+    let avg = (pixel.getRed() + pixel.getGreen() + pixel.getBlue()) / 3;
 
-		if (avg >= T) {
-			pixel.setAllColor(0);
-		} else {
-			pixel.setAllColor(255);
-		}
-	});
+    if (avg >= T) {
+      pixel.setAllColor(0);
+    } else {
+      pixel.setAllColor(255);
+    }
+  });
 
-	refImage.drawTo(canvas);
+  refImage.drawTo(canvas);
 }
 
